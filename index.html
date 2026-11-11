@@ -1,5 +1,5 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Burn It For Me: Spotify Mixtape Prototype</title>
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#121212"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mixtape"><style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#121212;color:#f7f7f5;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Burn It For Me</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Figtree:wght@400;600;700;800&family=Permanent+Marker&display=swap">
@@ -257,10 +257,8 @@ button{cursor:pointer}
 :root{--desk:#070707;--paper:#fbfbfd;--paper-line:#bcd0f2;--paper-ink:#1d2a6b}
 body{display:flex;justify-content:center}
 .phone{position:relative;width:100%;max-width:460px;height:100%;overflow:hidden;background:var(--ink)}
-@media (min-width:720px) and (min-height:700px){
-  body{align-items:center;background:var(--desk)}
-  .phone{height:min(calc(100% - 32px),880px);max-width:420px;border-radius:36px;box-shadow:0 0 0 1px #2c2c2c,0 30px 80px rgba(0,0,0,.6)}
-}
+html,body{height:100dvh;background:var(--ink)}
+.phone{height:100dvh}
 .scr{position:absolute;inset:0;background:var(--ink)}
 .scr:not(.app){display:flex;flex-direction:column}
 .scr.fwd{animation:inR .45s var(--bounce)}
@@ -304,7 +302,7 @@ body{display:flex;justify-content:center}
 .snapdisc .inkimg{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
 
 /* home */
-.topbar{display:flex;align-items:center;gap:10px}
+.topbar{display:flex;align-items:center;gap:10px}.topbar>.av{flex:0 0 32px;width:32px;height:32px;padding:0;line-height:1}
 .promo{position:relative;border-radius:22px;padding:18px;overflow:hidden;background:linear-gradient(135deg,#3a1d63 0%,#1d1236 55%,#121212 100%);display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:10px;align-items:center}
 .promo::before{content:"";position:absolute;inset:0;background:var(--memphis) 0 0/64px 64px;opacity:.13;pointer-events:none}
 .promo>*{position:relative}
@@ -504,19 +502,6 @@ body{display:flex;justify-content:center}
 .prog{position:absolute;left:10px;right:10px;bottom:4px;height:3px;border-radius:2px;background:rgba(255,255,255,.2)}
 .prog i{display:block;height:100%;background:#fff;border-radius:2px}
 
-/* prototype screen list (wide screens only) */
-.flownav{display:none}
-@media (min-width:1060px) and (min-height:700px){
-  .flownav{display:flex;flex-direction:column;gap:4px;position:fixed;left:calc(50% - 470px);top:50%;transform:translateY(-50%);width:210px;color:var(--muted)}
-}
-.flownav .fnh{margin:0 0 8px;font-weight:800;color:var(--text);font-size:15px}
-.flownav .fng{margin:12px 0 4px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.flownav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;counter-reset:fn}
-.flownav button{border:0;background:none;color:var(--muted);font-size:14px;font-weight:600;text-align:left;padding:6px 8px;border-radius:8px;width:100%;display:flex;gap:10px;align-items:center}
-.flownav button::before{counter-increment:fn;content:counter(fn);width:20px;height:20px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:11px;flex:none}
-.flownav button[aria-current]{color:var(--text);background:var(--surface)}
-.flownav button[aria-current]::before{background:var(--yellow);color:var(--ink)}
-.flownav button:hover{color:var(--text)}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -684,20 +669,18 @@ body{display:flex;justify-content:center}
       <button type="button" data-fx="more"><i><span data-ic="more"></span></i>More</button>
     </div>
   </div>
-  <footer class="sfoot pad col"><button class="btn go" data-go="notify"><span>See it on <span data-friend>Mia</span>'s phone</span><span data-ic="arrow"></span></button><button class="btn soft" data-go="home">Back to Home</button></footer>
+  <footer class="sfoot pad col"><button class="btn go" data-go="home">Back to Home</button></footer>
   <div class="story" id="story" hidden><div class="storycard" id="storyCard"></div><div class="row"><button class="btn soft" data-fx="storyx">Cancel</button><button class="btn go" data-fx="storypost">Share to story</button></div></div>
 </section>
 
 <section class="scr lock" data-s="notify" hidden>
-  <div class="who"><i></i><span class="whoN">Mia's phone</span></div>
   <div class="clock"><b id="lkT">9:41</b><span id="lkD"></span></div>
   <button class="notif" id="notif" data-go="open" type="button"></button>
   <p class="lockhint">Tap the notification to unwrap it</p>
 </section>
 
 <section class="scr" data-s="open" hidden>
-  <div class="who dark"><i></i><span class="whoN">Mia's phone</span></div>
-  <header class="top pad hpad"><button class="iconbtn" data-go="notify" aria-label="Back"><span data-ic="back"></span></button><div class="ttl"><b id="openTtl">From Alice</b><span data-title>summer mixtape for mia</span></div></header>
+  <header class="top pad hpad"><button class="iconbtn" data-go="home" aria-label="Back"><span data-ic="back"></span></button><div class="ttl"><b id="openTtl">From Alice</b><span data-title>summer mixtape for mia</span></div></header>
   <div class="sbody pad" id="openBody">
     <button class="gift" id="gift" type="button" data-fx="gift" aria-label="Open the case"><span class="cb"></span><span class="gd" id="giftDisc"></span><span class="lid"><span class="forlbl" id="forLbl">for Mia ♥</span></span></button>
     <p class="taphint" id="tapHint">tap to open</p>
@@ -707,11 +690,6 @@ body{display:flex;justify-content:center}
 </section>
 </div>
 
-<nav class="flownav" aria-label="Prototype screens">
-  <p class="fnh">Mixtape prototype</p>
-  <p class="fng">Alice's phone</p><ol id="fnA"></ol>
-  <p class="fng"><span data-friend>Mia</span>'s phone</p><ol id="fnB"></ol>
-</nav>
 
 <script>
 (()=>{
@@ -1193,7 +1171,7 @@ function go(name){
 window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur&&ORDER.includes(h))go(h)});
 function renderFlowNav(){
   const b=n=>`<li><button type="button" data-go="${n}"${n===cur?' aria-current="step"':''}>${LABEL[n]}</button></li>`;
-  $('#fnA').innerHTML=ORDER.slice(0,7).map(b).join('');$('#fnB').innerHTML=ORDER.slice(7).map(b).join('');
+
 }
 
 /* ---------- 1 · who it's for ---------- */
@@ -1257,7 +1235,7 @@ function renderNote(){syncNames();if(!flow.textEdited)flow.text=`Hey ${friend().
 const barsHTML=(hs,cls='')=>`<div class="wave ${cls}">${hs.map(h=>`<i style="--h:${Math.round(h)}px"></i>`).join('')}</div>`;
 function drawV(){
   const v=$('#vcard'),n=friend().n,top=`<div class="vtrack"><b>Track 0 · From ${SENDER}</b><span>plays before track 1</span></div>`;
-  if(rec.st==='idle')v.innerHTML=top+barsHTML(Array(36).fill(6))+`<div class="timer">0:00</div><button type="button" class="recbtn" data-fx="rec" aria-label="Start recording"><span></span></button><p class="vcap">Tap to record up to 30 seconds for ${n}.</p><p class="sim">Prototype: recording is simulated. No audio is captured.</p>`;
+  if(rec.st==='idle')v.innerHTML=top+barsHTML(Array(36).fill(6))+`<div class="timer">0:00</div><button type="button" class="recbtn" data-fx="rec" aria-label="Start recording"><span></span></button><p class="vcap">Tap to record up to 30 seconds for ${n}.</p>`;
   else if(rec.st==='rec')v.innerHTML=top+barsHTML(sample(flow.wave.slice(-36),36),'live')+`<div class="timer">${fmt(rec.t)}</div><button type="button" class="recbtn rec" data-fx="rec" aria-label="Stop recording"><span></span></button><p class="vcap">Recording… tap to stop</p>`;
   else v.innerHTML=top+barsHTML(sample(flow.wave,36))+`<div class="timer" id="vTime">${fmt(flow.voice)}</div><div class="vctl"><button type="button" class="pbtn" data-fx="vplay" aria-label="Play voice note">${I.playf}</button><button type="button" class="btn soft" data-fx="redo">${I.redo2}Record again</button></div><p class="vcap">Saved as Track 0. ${n} hears this first.</p>`;
 }
@@ -1395,7 +1373,7 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.dataset.go);return}
   const b=e.target.closest('[data-fx]');if(!b)return;const v=b.dataset.v;
   switch(b.dataset.fx){
-    case 'nav':toast('Not part of this prototype');break;
+    case 'nav':toast('Coming soon');break;
     case 'friend':flow.fid=v;autoTitle();renderFor();break;
     case 'occ':flow.occ=v;flow.titleEdited=false;autoTitle();renderFor();break;
     case 'side':flow.side=v;renderSongs();break;
@@ -1410,8 +1388,8 @@ document.addEventListener('click',e=>{
     case 'story':openStory();break;
     case 'storyx':$('#story').hidden=true;break;
     case 'storypost':$('#story').hidden=true;toast('Shared to your story');break;
-    case 'copy':toast('Link copied');break;
-    case 'more':toast('The share sheet opens here');break;
+    case 'copy':{const u=location.origin+location.pathname+'#open';try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied');break}
+    case 'more':{const u=location.origin+location.pathname+'#open';if(navigator.share){navigator.share({title:flow.title,text:'I burned you a mixtape',url:u}).catch(()=>{})}else{try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied')}break}
     case 'gift':openGift();break;
     case 'playq':playQ(+v||0);break;
     case 'pp':pl.on=!pl.on;if(pl.on){pl.last=performance.now();pl.raf=requestAnimationFrame(tickP)}else cancelAnimationFrame(pl.raf);drawMini();break;
