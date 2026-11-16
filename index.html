@@ -395,6 +395,16 @@ html,body{height:100dvh;background:var(--ink)}
 .plh small{color:var(--muted);font-size:12px}
 .from{color:var(--pink)}
 
+/* spotify link */
+.sppane{display:flex;flex-direction:column;gap:12px}
+.sppane .sub b{color:var(--text)}
+.spadd{display:flex;gap:8px}
+.spadd .search{flex:1;min-width:0}
+.spadd .btn{height:44px;padding:0 18px;transform:none}
+.sperr{margin:0;font-size:13px;color:var(--yellow)}
+.spembed{display:block;border:0;border-radius:12px;background:#282828}
+.bonus{display:flex;flex-direction:column;gap:8px}
+.bonus .label{margin:0}
 /* note */
 .vcard{background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;flex:none}
 .vtrack{align-self:stretch;display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
@@ -1227,7 +1237,7 @@ function renderSongs(){
   const cap=$('#cap');cap.className='cap'+(left<60?' full':pct>=75?' warn':'');
   cap.innerHTML=`<div class="capbar" role="meter" aria-valuemin="0" aria-valuemax="${CAP}" aria-valuenow="${used}" aria-label="Time used on Side ${sd}"><i style="width:${pct}%"></i></div><div class="capt"><span><b>${fmt(used)}</b> of 20:00 on Side ${sd}</span><span>${left<60?'Side full':fmt(left)+' left'}</span></div>`;
   $('#liner').innerHTML=`<p class="lh">Side ${sd}</p>`+(flow[sd].length?`<ol>${flow[sd].map(id=>`<li>${esc(SONG[id].t)}<button type="button" class="rm" data-fx="rmsong" data-v="${id}" aria-label="Remove ${esc(SONG[id].t)}">×</button></li>`).join('')}</ol>`:`<p class="empty">nothing here yet, add a song below</p>`);
-  $('#srcTabs').innerHTML=[['search','Search'],['mine','Your playlists'],['friends',"Friends' playlists"]].map(([k,n])=>`<button type="button" class="pill${k===flow.src?' on':''}" data-fx="src" data-v="${k}" aria-pressed="${k===flow.src}">${n}</button>`).join('');
+  $('#srcTabs').innerHTML=[['search','Search'],['spotify',flow.sp?'From Spotify ✓':'From Spotify'],['mine','Your playlists'],['friends',"Friends' playlists"]].map(([k,n])=>`<button type="button" class="pill${k===flow.src?' on':''}" data-fx="src" data-v="${k}" aria-pressed="${k===flow.src}">${n}</button>`).join('');
   $('#sSearch').hidden=flow.src!=='search';
   renderSongList();
 }
@@ -1239,10 +1249,25 @@ function renderSongList(){
   let h='';
   if(flow.src==='search'){const q=flow.q.trim().toLowerCase();const ids=SONGS.filter(x=>!q||(x.t+' '+x.a).toLowerCase().includes(q)).map(x=>x.id);
     h=ids.length?ids.map(songRow).join(''):`<p class="sub">No songs match “${esc(flow.q)}”.</p>`}
+  else if(flow.src==='spotify')h=spotifyPane();
   else h=PLAYLISTS[flow.src].map(pl=>`<div class="plh"><i class="cov" style="--c:${pl.c};--c2:${pl.c2}"></i><span><b>${esc(pl.n)}</b><small>${pl.by?`<span class="from">${esc(pl.by)}'s playlist</span>`:'Your playlist'} · ${pl.ids.length} songs</small></span></div>`+pl.ids.map(songRow).join('')).join('');
   $('#slist').innerHTML=h;
 }
 $('#sq').addEventListener('input',e=>{flow.q=e.target.value;renderSongList()});
+/* paste a real Spotify playlist or album link; it rides along in the case as a bonus */
+function parseSpotify(t){t=(t||'').trim();let m=t.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?(playlist|album)\/([A-Za-z0-9]{10,40})/)||t.match(/^spotify:(playlist|album):([A-Za-z0-9]{10,40})$/);
+  return m?{t:m[1],id:m[2]}:null}
+const spEmbed=(sp,h=352)=>`<iframe class="spembed" title="Spotify ${sp.t}" src="https://open.spotify.com/embed/${sp.t}/${sp.id}?utm_source=generator&theme=0" width="100%" height="${h}" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+function spotifyPane(){
+  if(flow.sp)return `<div class="sppane"><p class="sub">This playlist goes in the case as a bonus. ${esc(friend().n)} can play it right from the mixtape.</p>${spEmbed(flow.sp)}<button type="button" class="btn soft" data-fx="sprm">Remove playlist</button></div>`;
+  return `<div class="sppane"><p class="sub">Add one of your own Spotify playlists. In Spotify, tap <b>⋯</b> on a playlist, then <b>Share</b> and <b>Copy link</b>, and paste it here.</p>
+  <div class="spadd"><label class="search"><span>${I.search||''}</span><input id="spIn" type="url" inputmode="url" placeholder="open.spotify.com/playlist/…" autocomplete="off" aria-label="Spotify playlist link"></label><button type="button" class="btn go" data-fx="spadd">Add</button></div>
+  <p class="sperr" id="spErr" hidden></p></div>`;
+}
+function addSpotify(){const v=$('#spIn').value,sp=parseSpotify(v),err=$('#spErr');
+  if(!sp){err.hidden=false;err.textContent=/spotify\.link/.test(v)?"That's a short link. Open it once in your browser, then copy the full open.spotify.com address.":"That doesn't look like a Spotify playlist or album link.";return}
+  flow.sp=sp;toast('Playlist added to the case');renderSongs()}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='spIn'){e.preventDefault();addSpotify()}});
 function toggleSong(id){
   const sd=flow.side,other=sd==='A'?'B':'A';
   for(const x of ['A','B'])if(flow[x].includes(id)){flow[x]=flow[x].filter(v=>v!==id);toast(`Removed from Side ${x}`);renderSongs();return}
@@ -1325,14 +1350,14 @@ const shrinkImg=(src,size,type,q)=>new Promise(res=>{const im=new Image();im.onl
 async function buildShare(){
   const items=[];for(const it of state.items){const o={...it};delete o.id;if(o.kind==='photo'&&o.src&&o.src.startsWith('data:')){o.src=await shrinkImg(o.src,160,'image/jpeg',.6);if(!o.src){delete o.src;o.preset='polaroid'}}items.push(o)}
   let ink=null;if(state.inked&&cv.width){const c=document.createElement('canvas');c.width=c.height=260;c.getContext('2d').drawImage(cv,0,0,260,260);ink=c.toDataURL('image/webp',.7)}
-  const d={to:friend().n,title:flow.title,finish:state.finish,items,ink,voice:flow.voice,wave:sample(flow.wave,40).map(Math.round),text:flow.text,A:flow.A,B:flow.B};
+  const d={to:friend().n,title:flow.title,finish:state.finish,items,ink,voice:flow.voice,wave:sample(flow.wave,40).map(Math.round),text:flow.text,A:flow.A,B:flow.B,sp:flow.sp||null};
   let bytes=new TextEncoder().encode(JSON.stringify(d)),tag='j';
   if(window.CompressionStream){try{const st=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer());tag='z'}catch(e){}}
   return location.origin+location.pathname+'#m='+tag+b64u(bytes);
 }
 async function readShare(h){const tag=h[0];let bytes=unb64u(h.slice(1));
   if(tag==='z'){const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer())}
-  const d=JSON.parse(new TextDecoder().decode(bytes));d.A=(d.A||[]).filter(id=>SONG[id]);d.B=(d.B||[]).filter(id=>SONG[id]);d.wave=d.wave||[];d.voice=+d.voice||0;d.text=d.text||'';return d}
+  const d=JSON.parse(new TextDecoder().decode(bytes));d.A=(d.A||[]).filter(id=>SONG[id]);d.B=(d.B||[]).filter(id=>SONG[id]);d.wave=d.wave||[];d.sp=d.sp&&/^(playlist|album)$/.test(d.sp.t)&&/^[A-Za-z0-9]{10,40}$/.test(d.sp.id)?d.sp:null;d.voice=+d.voice||0;d.text=d.text||'';return d}
 function openShared(h){readShare(h).then(d=>{SHARED=d;giftMode='shared';cur=null;go('open')}).catch(()=>{toast("That mixtape link didn't come through");go('home')})}
 function renderSent(){
   shareURL='';buildShare().then(u=>shareURL=u).catch(()=>{});
@@ -1404,7 +1429,8 @@ function revealHTML(){const flow=GIFT();
   const voice=flow.voice?`<div class="vplay"><button type="button" class="pbtn" data-fx="playq" data-v="0" aria-label="Play voice note">${I.playf}</button><span class="vt"><b>Track 0 · From ${SENDER}</b>${barsHTML(sample(flow.wave,30).map(h=>Math.max(4,h*.45)),'tiny')}</span><span class="tm">${fmt(flow.voice)}</span></div>`:'';
   const note=flow.text.trim()?`<p class="notecard">${esc(flow.text.trim())}<span class="sig">${SENDER}</span></p>`:'';
   const side=x=>flow[x].length?`<p class="lh">Side ${x}</p><ol>${flow[x].map(id=>`<li>${esc(SONG[id].t)} <small>${esc(SONG[id].a)}</small></li>`).join('')}</ol>`:'';
-  return voice+note+`<div class="liner big">${side('A')}${side('B')}</div><div class="actions"><button type="button" class="btn go" data-fx="playq" data-v="0">${I.playf}Play mixtape</button><button type="button" class="btn soft" data-fx="keep" aria-pressed="${kept}">${kept?I.check+'On your shelf':'Keep on shelf'}</button></div><button type="button" class="btn soft home-btn" data-go="home">${I.home}Back to Home</button>`;
+  const bonus=flow.sp?`<div class="bonus"><p class="label">Bonus playlist</p>${spEmbed(flow.sp)}</div>`:'';
+  return voice+note+`<div class="liner big">${side('A')}${side('B')}</div>${bonus}<div class="actions"><button type="button" class="btn go" data-fx="playq" data-v="0">${I.playf}Play mixtape</button><button type="button" class="btn soft" data-fx="keep" aria-pressed="${kept}">${kept?I.check+'On your shelf':'Keep on shelf'}</button></div><button type="button" class="btn soft home-btn" data-go="home">${I.home}Back to Home</button>`;
 }
 function queue(){const flow=GIFT();const q=[];if(flow.voice)q.push({t:`Track 0 · From ${SENDER}`,a:'Voice note',d:flow.voice});[...flow.A,...flow.B].forEach(id=>q.push(SONG[id]));return q}
 function playQ(i){pl.q=queue();if(!pl.q.length)return;pl.i=i;pl.t=0;pl.on=true;$('#mini').hidden=false;$('#openBody').style.paddingBottom='86px';drawMini();pl.last=performance.now();cancelAnimationFrame(pl.raf);pl.raf=requestAnimationFrame(tickP)}
@@ -1431,6 +1457,8 @@ document.addEventListener('click',e=>{
     case 'side':flow.side=v;renderSongs();break;
     case 'src':flow.src=v;renderSongs();break;
     case 'addsong':toggleSong(v);break;
+    case 'spadd':addSpotify();break;
+    case 'sprm':flow.sp=null;renderSongs();break;
     case 'rmsong':flow[flow.side]=flow[flow.side].filter(x=>x!==v);renderSongs();break;
     case 'rec':toggleRec();break;
     case 'vplay':playVoice();break;
