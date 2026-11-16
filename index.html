@@ -404,6 +404,12 @@ html,body{height:100dvh;background:var(--ink)}
 .sperr{margin:0;font-size:13px;color:var(--yellow)}
 .spembed{display:block;border:0;border-radius:12px;background:#282828}
 .bonus{display:flex;flex-direction:column;gap:8px}
+.ownsongs{display:flex;flex-direction:column;gap:8px;background:var(--surface);border-radius:16px;padding:16px}
+.ownsongs .label,.ownsongs .sub{margin:0}
+.cuform{display:flex;flex-direction:column;gap:8px}
+.cuin{height:44px;border:0;border-radius:10px;background:var(--surface-2);color:var(--text);padding:0 12px;font-size:15px;outline:none}
+.cuin:focus{box-shadow:0 0 0 2px var(--yellow)}
+.cuform .btn{height:44px;transform:none}
 .bonus .label{margin:0}
 /* note */
 .vcard{background:var(--surface);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;flex:none}
@@ -810,6 +816,9 @@ const CLASS={to:'UXDG 315',title:'a mixtape for UXDG 315',finish:'airbrush',voic
     {kind:'text',text:'thank you!',font:'hand',color:'#FFDF40',x:36,y:81,rot:-10,sc:.85},
     {kind:'text',text:'fall 2026',font:'hand',color:'#ffffff',x:50,y:66,rot:4,sc:.5}]};
 let giftMode='class',SHARED=null,shareURL='';
+const CUSTOM=[];
+function regSong(id,t,a,d){const pal=[['#1ED760','#FFDF40'],['#FF3FA4','#19C3C6'],['#8E5BFF','#FFDF40'],['#19C3C6','#FF3FA4']][Object.keys(SONG).length%4];
+  SONG[id]={id,t,a,d,c:pal[0],c2:pal[1],own:true};return id}
 const GIFT=()=>giftMode==='class'?CLASS:giftMode==='shared'?SHARED:window.__flow;
 const PLAYLISTS={
   mine:[{n:'Liked Songs',c:'#8E5BFF',c2:'#ffffff',ids:['s1','s6','s16','s17','s18','s12']},{n:'Y2K Forever',c:'#19C3C6',c2:'#FF3FA4',ids:['s2','s4','s5','s8']}],
@@ -1259,15 +1268,23 @@ function parseSpotify(t){t=(t||'').trim();let m=t.match(/open\.spotify\.com\/(?:
   return m?{t:m[1],id:m[2]}:null}
 const spEmbed=(sp,h=352)=>`<iframe class="spembed" title="Spotify ${sp.t}" src="https://open.spotify.com/embed/${sp.t}/${sp.id}?utm_source=generator&theme=0" width="100%" height="${h}" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
 function spotifyPane(){
-  if(flow.sp)return `<div class="sppane"><p class="sub">This playlist goes in the case as a bonus. ${esc(friend().n)} can play it right from the mixtape.</p>${spEmbed(flow.sp)}<button type="button" class="btn soft" data-fx="sprm">Remove playlist</button></div>`;
+  const own=`<div class="ownsongs"><p class="label">Add songs from it to Side ${flow.side}</p>
+    <p class="sub">Type a song from your playlist and it goes on the tracklist.</p>
+    <div class="cuform"><input id="cuT" class="cuin" placeholder="Song title" autocomplete="off" aria-label="Song title"><input id="cuA" class="cuin" placeholder="Artist" autocomplete="off" aria-label="Artist">
+    <button type="button" class="btn go" data-fx="cuadd">Add to Side ${flow.side}</button></div>${CUSTOM.length?`<div>${CUSTOM.map(songRow).join('')}</div>`:''}</div>`;
+  if(flow.sp)return `<div class="sppane">${spEmbed(flow.sp)}${own}<p class="sub">The whole playlist also goes in the case as a bonus. ${esc(friend().n)} can play it right from the mixtape.</p><button type="button" class="btn soft" data-fx="sprm">Remove playlist</button></div>`;
   return `<div class="sppane"><p class="sub">Add one of your own Spotify playlists. In Spotify, tap <b>⋯</b> on a playlist, then <b>Share</b> and <b>Copy link</b>, and paste it here.</p>
   <div class="spadd"><label class="search"><span>${I.search||''}</span><input id="spIn" type="url" inputmode="url" placeholder="open.spotify.com/playlist/…" autocomplete="off" aria-label="Spotify playlist link"></label><button type="button" class="btn go" data-fx="spadd">Add</button></div>
-  <p class="sperr" id="spErr" hidden></p></div>`;
+  <p class="sperr" id="spErr" hidden></p>${CUSTOM.length?`<div>${CUSTOM.map(songRow).join('')}</div>`:''}</div>`;
 }
+function addCustom(){const t=$('#cuT').value.trim(),a=$('#cuA').value.trim();if(!t){$('#cuT').focus();toast('Type a song title');return}
+  const ex=CUSTOM.find(id=>SONG[id].t.toLowerCase()===t.toLowerCase()&&SONG[id].a.toLowerCase()===a.toLowerCase());
+  const id=ex||regSong('u'+Date.now().toString(36),t,a||'Unknown artist',210);if(!ex)CUSTOM.push(id);
+  if(flow.A.includes(id)||flow.B.includes(id)){toast('Already on the tracklist');return}toggleSong(id)}
 function addSpotify(){const v=$('#spIn').value,sp=parseSpotify(v),err=$('#spErr');
   if(!sp){err.hidden=false;err.textContent=/spotify\.link/.test(v)?"That's a short link. Open it once in your browser, then copy the full open.spotify.com address.":"That doesn't look like a Spotify playlist or album link.";return}
   flow.sp=sp;toast('Playlist added to the case');renderSongs()}
-document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='spIn'){e.preventDefault();addSpotify()}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(e.target.id==='spIn'){e.preventDefault();addSpotify()}else if(e.target.id==='cuT'||e.target.id==='cuA'){e.preventDefault();addCustom()}});
 function toggleSong(id){
   const sd=flow.side,other=sd==='A'?'B':'A';
   for(const x of ['A','B'])if(flow[x].includes(id)){flow[x]=flow[x].filter(v=>v!==id);toast(`Removed from Side ${x}`);renderSongs();return}
@@ -1350,14 +1367,14 @@ const shrinkImg=(src,size,type,q)=>new Promise(res=>{const im=new Image();im.onl
 async function buildShare(){
   const items=[];for(const it of state.items){const o={...it};delete o.id;if(o.kind==='photo'&&o.src&&o.src.startsWith('data:')){o.src=await shrinkImg(o.src,160,'image/jpeg',.6);if(!o.src){delete o.src;o.preset='polaroid'}}items.push(o)}
   let ink=null;if(state.inked&&cv.width){const c=document.createElement('canvas');c.width=c.height=260;c.getContext('2d').drawImage(cv,0,0,260,260);ink=c.toDataURL('image/webp',.7)}
-  const d={to:friend().n,title:flow.title,finish:state.finish,items,ink,voice:flow.voice,wave:sample(flow.wave,40).map(Math.round),text:flow.text,A:flow.A,B:flow.B,sp:flow.sp||null};
+  const d={to:friend().n,title:flow.title,finish:state.finish,items,ink,voice:flow.voice,wave:sample(flow.wave,40).map(Math.round),text:flow.text,A:flow.A,B:flow.B,sp:flow.sp||null,cu:[...flow.A,...flow.B].filter(id=>SONG[id]&&SONG[id].own).map(id=>[id,SONG[id].t,SONG[id].a,SONG[id].d])};
   let bytes=new TextEncoder().encode(JSON.stringify(d)),tag='j';
   if(window.CompressionStream){try{const st=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer());tag='z'}catch(e){}}
   return location.origin+location.pathname+'#m='+tag+b64u(bytes);
 }
 async function readShare(h){const tag=h[0];let bytes=unb64u(h.slice(1));
   if(tag==='z'){const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer())}
-  const d=JSON.parse(new TextDecoder().decode(bytes));d.A=(d.A||[]).filter(id=>SONG[id]);d.B=(d.B||[]).filter(id=>SONG[id]);d.wave=d.wave||[];d.sp=d.sp&&/^(playlist|album)$/.test(d.sp.t)&&/^[A-Za-z0-9]{10,40}$/.test(d.sp.id)?d.sp:null;d.voice=+d.voice||0;d.text=d.text||'';return d}
+  const d=JSON.parse(new TextDecoder().decode(bytes));(d.cu||[]).forEach(([id,t,a,du])=>{if(/^u[a-z0-9]{1,16}$/.test(id))regSong(id,String(t).slice(0,80),String(a).slice(0,80),+du||210)});d.A=(d.A||[]).filter(id=>SONG[id]);d.B=(d.B||[]).filter(id=>SONG[id]);d.wave=d.wave||[];d.sp=d.sp&&/^(playlist|album)$/.test(d.sp.t)&&/^[A-Za-z0-9]{10,40}$/.test(d.sp.id)?d.sp:null;d.voice=+d.voice||0;d.text=d.text||'';return d}
 function openShared(h){readShare(h).then(d=>{SHARED=d;giftMode='shared';cur=null;go('open')}).catch(()=>{toast("That mixtape link didn't come through");go('home')})}
 function renderSent(){
   shareURL='';buildShare().then(u=>shareURL=u).catch(()=>{});
@@ -1458,6 +1475,7 @@ document.addEventListener('click',e=>{
     case 'src':flow.src=v;renderSongs();break;
     case 'addsong':toggleSong(v);break;
     case 'spadd':addSpotify();break;
+    case 'cuadd':addCustom();break;
     case 'sprm':flow.sp=null;renderSongs();break;
     case 'rmsong':flow[flow.side]=flow[flow.side].filter(x=>x!==v);renderSongs();break;
     case 'rec':toggleRec();break;
