@@ -528,7 +528,7 @@ html,body{height:100dvh;background:var(--ink)}
 <div class="phone" id="phone">
 <section class="scr" data-s="home" hidden>
   <div class="sbody pad">
-    <div class="topbar"><span class="av avsm" style="--c:#C9A8FF">A</span><div class="chiprow"><button class="pill on" type="button">All</button><button class="pill" type="button" data-fx="nav">Music</button><button class="pill" type="button" data-fx="nav">Podcasts</button><button class="pill" type="button" data-go="for">Mixtapes</button></div><button class="inbox" type="button" data-go="open" aria-label="Open the mixtape you got"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3.5a8.5 8.5 0 016.5 3"/></svg><i class="badge">1</i></button><span class="inbox-tip" id="inboxTip">You got a mixtape! Tap to open</span></div>
+    <div class="topbar"><span class="av avsm" style="--c:#C9A8FF">A</span><div class="chiprow"><button class="pill on" type="button">All</button><button class="pill" type="button" data-fx="nav">Music</button><button class="pill" type="button" data-fx="nav">Podcasts</button><button class="pill" type="button" data-go="for">Mixtapes</button></div><button class="inbox" type="button" data-go="open" aria-label="Open the mixtape you got"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3.5a8.5 8.5 0 016.5 3"/></svg><i class="badge">1</i></button><span class="inbox-tip" id="inboxTip">A mixtape for UXDG 315! Tap to open</span></div>
     <article class="promo">
       <div><span class="tag">NEW</span><h2>Make a <em>mixtape</em></h2><p>Pick the songs, decorate the disc, record a hello. Then hand it to someone.</p><button class="btn go" data-go="for">Make a mixtape</button></div>
       <div class="minidisc" aria-hidden="true"></div>
@@ -782,6 +782,22 @@ const SONGS=[
   ['s16','Hollaback Girl','Gwen Stefani',199],['s17','Yeah!','Usher',250],['s18',"Fallin'",'Alicia Keys',210]
 ].map(([id,t,a,d],i)=>{const pal=[['#FFDF40','#FF6BB5'],['#5AB8FF','#1ED760'],['#FF6BB5','#FFDF40'],['#1ED760','#ffffff'],['#C9A8FF','#5AB8FF'],['#FF8A3D','#FFDF40'],['#19C3C6','#FF3FA4'],['#8E5BFF','#B6F23A']][i%8];return{id,t,a,d,c:pal[0],c2:pal[1]}});
 const SONG=Object.fromEntries(SONGS.map(x=>[x.id,x]));
+[['c1','Under Pressure','Queen & David Bowie',248,'#FFDF40','#8E5BFF'],['c2',"Don't Stop Me Now",'Queen',209,'#FF3FA4','#FFDF40'],['c4','Here Comes the Sun','The Beatles',185,'#FFDF40','#19C3C6'],
+ ['c5','Good as Hell','Lizzo',159,'#8E5BFF','#FF3FA4'],['c7','Time After Time','Cyndi Lauper',241,'#19C3C6','#ffffff'],['c8','Graduation (Friends Forever)','Vitamin C',246,'#B6F23A','#FF3FA4']]
+ .forEach(([id,t,a,d,c,c2])=>SONG[id]={id,t,a,d,c,c2});
+const CLASS={to:'UXDG 315',title:'a mixtape for UXDG 315',finish:'airbrush',voice:14,
+  wave:Array.from({length:60},(_,i)=>14+30*Math.abs(Math.sin(i*.9)*Math.cos(i*.37))),
+  text:"Hey UXDG 315,\nthank you for a quarter of crits, sketches and Prof. Panke's mixtape stories. I burned this one for all of you. Side B is for the all-nighters.",
+  A:['c1','c2','s3','c4','c5'],B:['s13','c7','c8'],
+  items:[{kind:'curved',rim:true,text:'a mixtape for UXDG 315',font:'marker',color:'#ffffff',x:50,y:50,rot:0,sc:1},
+    {kind:'tape',pattern:'dots',x:27,y:30,rot:-36,sc:.75},
+    {kind:'sticker',key:'playme',x:73,y:31,rot:14,sc:.85},
+    {kind:'sticker',key:'puffystar',mat:'puffy',x:25,y:66,rot:-14,sc:.8},
+    {kind:'sticker',key:'cassette',x:72,y:67,rot:10,sc:.8},
+    {kind:'sticker',key:'heart',x:58,y:24,rot:-8,sc:.5},
+    {kind:'text',text:'thank you!',font:'hand',color:'#FFDF40',x:36,y:81,rot:-10,sc:.85},
+    {kind:'text',text:'fall 2026',font:'hand',color:'#ffffff',x:47,y:70,rot:4,sc:.55}]};
+let giftMode='class';
 const PLAYLISTS={
   mine:[{n:'Liked Songs',c:'#8E5BFF',c2:'#ffffff',ids:['s1','s6','s16','s17','s18','s12']},{n:'Y2K Forever',c:'#19C3C6',c2:'#FF3FA4',ids:['s2','s4','s5','s8']}],
   friends:[{n:"Road Trip '04",by:'Mia',c:'#FF6BB5',c2:'#5AB8FF',ids:['s7','s10','s11','s3','s9']},{n:'Garage Rock 1986',by:'Dad',c:'#FFDF40',c2:'#121212',ids:['s13','s14','s15']}]
@@ -791,6 +807,7 @@ const OCC=['summer','road trip','birthday','just because','study','breakup'];
 const SENDER='Alice',CAP=1200;
 const flow={fid:'mia',occ:'summer',title:'summer mixtape for mia',titleEdited:false,A:['s1','s2','s3','s4','s5'],B:['s13','s15'],side:'A',src:'search',q:'',voice:0,wave:[],
   text:'',textEdited:false,when:'now'};
+window.__flow=flow;
 const POLAROID=`<svg viewBox="0 0 60 72"><rect width="60" height="72" rx="1.5" fill="#fff"/><rect x="4" y="4" width="52" height="50" fill="#5AB8FF"/><rect x="4" y="4" width="52" height="22" fill="#C9A8FF"/><circle cx="41" cy="25" r="8" fill="#FFDF40"/><path d="M4 44q12-9 24-2t28-3v15H4z" fill="#1ED760"/><circle cx="20" cy="38" r="3.4" fill="#121212"/><path d="M15 50q5-10 10 0" fill="#121212"/><circle cx="30" cy="37" r="3.4" fill="#121212"/><path d="M25 50q5-10 10 0" fill="#121212"/><text x="30" y="66" text-anchor="middle" font-family="Caveat,cursive" font-weight="700" font-size="9" fill="#333">us, summer '04</text></svg>`;
 const STRIP=`<svg viewBox="0 0 30 92"><rect width="30" height="92" rx="1" fill="#fff"/>${[3,30,57].map((y,i)=>`<rect x="3" y="${y}" width="24" height="24" fill="${['#FF6BB5','#FFDF40','#5AB8FF'][i]}"/><circle cx="15" cy="${y+10}" r="4.5" fill="#121212"/><path d="M8 ${y+24}q7-10 14 0" fill="#121212"/>`).join('')}<text x="15" y="89" text-anchor="middle" font-family="Caveat,cursive" font-weight="700" font-size="6" fill="#333">photo booth</text></svg>`;
 const FINISHES=[['silver','Silver CD-R','radial-gradient(circle,#f6f7f9,#c5cad0)'],['memphis','Memphis','var(--memphis) 0 0/22px 22px,#fbfbfd'],['brush','Brushstroke','var(--brush) center/100% 100%,#f3f2f7'],['airbrush','Airbrush','radial-gradient(circle at 28% 26%,#FFDF40 0,transparent 40%),radial-gradient(circle at 74% 72%,#19C3C6 0,transparent 50%),linear-gradient(135deg,#FF3FA4,#8E5BFF)'],['green','Green','#1ED760'],['yellow','Yellow','#FFDF40'],['midnight','Midnight','#24243a'],['print','Print','radial-gradient(circle,#FFDF40 0 25%,transparent 28%) 0 0/9px 9px,#FF6BB5']];
@@ -1149,13 +1166,13 @@ function sample(arr,n){if(!arr.length)return Array.from({length:n},(_,i)=>10+18*
 
 /* a frozen copy of the decorated disc, for review, sent, notification and unwrap */
 let cloneN=0;
-function discClone(){
+function discClone(noInk){
   const keep=selected;selected=null;render();
   const c=disc.cloneNode(true);c.removeAttribute('id');c.classList.remove('drawing','spin');c.classList.add('snapdisc');c.setAttribute('aria-hidden','true');
   const n=++cloneN;
   c.querySelectorAll('[id]').forEach(el=>{const o=el.id,nu=o+'-c'+n;el.id=nu;c.querySelectorAll(`[href="#${o}"]`).forEach(h=>h.setAttribute('href','#'+nu))});
   const cans=c.querySelectorAll('canvas');
-  if(cans[0]){if(cv.width){const im=document.createElement('img');im.className='inkimg';im.alt='';im.src=cv.toDataURL();cans[0].replaceWith(im)}else cans[0].remove()}
+  if(cans[0]){if(cv.width&&!noInk){const im=document.createElement('img');im.className='inkimg';im.alt='';im.src=cv.toDataURL();cans[0].replaceWith(im)}else cans[0].remove()}
   if(cans[1])cans[1].remove();
   const h=c.querySelector('.hint');if(h)h.remove();
   selected=keep;render();
@@ -1310,7 +1327,7 @@ function openStory(){const f=friend(),card=$('#storyCard');
 
 /* ---------- 7 · friend's lock screen ---------- */
 function renderNotify(){
-  syncNames();const later=flow.when==='later',d=later?laterDate():new Date();
+  giftMode='flow';syncNames();const later=flow.when==='later',d=later?laterDate():new Date();
   $('#lkT').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}).replace(/\s?[AP]M$/i,'');
   $('#lkD').textContent=d.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric'});
   const n=flow.A.length+flow.B.length,nt=$('#notif');
@@ -1321,11 +1338,14 @@ function renderNotify(){
 /* ---------- 8 · unwrap ---------- */
 let opened=false,kept=false;
 const pl={q:[],i:0,t:0,on:false,raf:null,last:0};
+function classDisc(){const s=state,sel=selected;state={finish:CLASS.finish,inked:false,items:CLASS.items.map(x=>({...x,id:uid++}))};selected=null;
+  const c=discClone(true);state=s;selected=sel;render();return c}
 function renderOpen(){
-  syncNames();opened=false;
-  $('#openTtl').textContent=`From ${SENDER}`;$('#forLbl').textContent=`for ${friend().n} ♥`;
+  syncNames();opened=false;const cls=giftMode==='class';
+  $('#openTtl').textContent=`From ${SENDER}`;$('#forLbl').textContent=`for ${cls?CLASS.to:friend().n} ♥`;
+  $('[data-s=open] [data-title]').textContent=cls?CLASS.title:flow.title;
   const g=$('#gift');g.classList.remove('open');g.setAttribute('aria-label','Open the case');
-  const gd=$('#giftDisc');gd.innerHTML='';gd.appendChild(discClone());
+  const gd=$('#giftDisc');gd.innerHTML='';gd.appendChild(cls?classDisc():discClone());
   $('#tapHint').hidden=false;$('#reveal').hidden=true;$('#reveal').innerHTML='';$('#mini').hidden=true;$('#openBody').style.paddingBottom='';
 }
 /* confetti, curly streamers and surprise stickers burst out of the case */
@@ -1359,13 +1379,13 @@ function openGift(){
   const host=$('[data-s=open]'),gift=$('#gift');setTimeout(()=>{if(cur==='open')burst(host,gift,true)},280);setTimeout(()=>{if(cur==='open')burst(host,gift,false)},900);
   setTimeout(()=>{if(cur!=='open')return;const r=$('#reveal');r.innerHTML=revealHTML();r.hidden=false;r.scrollIntoView({behavior:'smooth',block:'start'})},1500);
 }
-function revealHTML(){
+function revealHTML(){const flow=giftMode==='class'?CLASS:window.__flow;
   const voice=flow.voice?`<div class="vplay"><button type="button" class="pbtn" data-fx="playq" data-v="0" aria-label="Play voice note">${I.playf}</button><span class="vt"><b>Track 0 · From ${SENDER}</b>${barsHTML(sample(flow.wave,30).map(h=>Math.max(4,h*.45)),'tiny')}</span><span class="tm">${fmt(flow.voice)}</span></div>`:'';
   const note=flow.text.trim()?`<p class="notecard">${esc(flow.text.trim())}<span class="sig">${SENDER}</span></p>`:'';
   const side=x=>flow[x].length?`<p class="lh">Side ${x}</p><ol>${flow[x].map(id=>`<li>${esc(SONG[id].t)} <small>${esc(SONG[id].a)}</small></li>`).join('')}</ol>`:'';
   return voice+note+`<div class="liner big">${side('A')}${side('B')}</div><div class="actions"><button type="button" class="btn go" data-fx="playq" data-v="0">${I.playf}Play mixtape</button><button type="button" class="btn soft" data-fx="keep" aria-pressed="${kept}">${kept?I.check+'On your shelf':'Keep on shelf'}</button></div><button type="button" class="btn soft home-btn" data-go="home">${I.home}Back to Home</button>`;
 }
-function queue(){const q=[];if(flow.voice)q.push({t:`Track 0 · From ${SENDER}`,a:'Voice note',d:flow.voice});[...flow.A,...flow.B].forEach(id=>q.push(SONG[id]));return q}
+function queue(){const flow=giftMode==='class'?CLASS:window.__flow;const q=[];if(flow.voice)q.push({t:`Track 0 · From ${SENDER}`,a:'Voice note',d:flow.voice});[...flow.A,...flow.B].forEach(id=>q.push(SONG[id]));return q}
 function playQ(i){pl.q=queue();if(!pl.q.length)return;pl.i=i;pl.t=0;pl.on=true;$('#mini').hidden=false;$('#openBody').style.paddingBottom='86px';drawMini();pl.last=performance.now();cancelAnimationFrame(pl.raf);pl.raf=requestAnimationFrame(tickP)}
 function tickP(now){if(!pl.on)return;pl.t+=(now-pl.last)/1000;pl.last=now;
   if(pl.t>=pl.q[pl.i].d){if(pl.i<pl.q.length-1){pl.i++;pl.t=0;drawMini()}else{pl.on=false;pl.t=pl.q[pl.i].d;drawMini();return}}
@@ -1413,7 +1433,7 @@ function startFlow(){syncNames();const h=location.hash.slice(1);go(ORDER.include
 load();renderTools();render();
 startFlow();
 })();
-document.querySelector('.inbox').addEventListener('click',e=>e.currentTarget.classList.add('seen'));
+document.querySelector('.inbox').addEventListener('click',e=>{e.currentTarget.classList.add('seen')});
 </script>
 
 </body></html>
