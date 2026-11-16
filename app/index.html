@@ -334,6 +334,16 @@ html,body{height:100dvh;background:var(--ink)}
 .tabbar svg{width:24px;height:24px}
 .tabbar [aria-current]{color:var(--text)}
 
+.topbar{position:relative}
+.topbar .chiprow{flex:1;min-width:0;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);padding-right:16px}
+.inbox{position:relative;flex:none;width:36px;height:36px;border-radius:50%;border:0;padding:0;background:var(--surface-2);color:var(--text);display:grid;place-items:center;transition:transform .3s var(--bounce)}
+.inbox:active{transform:scale(.88)}
+.inbox svg{width:20px;height:20px}
+.inbox .badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:9px;background:var(--magenta);color:#fff;font-style:normal;font-size:11px;font-weight:800;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--ink)}
+.inbox-tip{position:absolute;right:0;top:calc(100% + 10px);z-index:5;background:var(--yellow);color:var(--ink);font-size:12px;line-height:16px;font-weight:800;padding:8px 12px;border-radius:12px;white-space:nowrap;box-shadow:2px 3px 0 rgba(0,0,0,.5);pointer-events:none;animation:tipbob 1.6s ease-in-out infinite}
+.inbox-tip::before{content:"";position:absolute;right:12px;top:-6px;border:6px solid transparent;border-top:0;border-bottom-color:var(--yellow)}
+@keyframes tipbob{50%{transform:translateY(3px)}}
+.inbox.seen .badge,.inbox.seen+.inbox-tip{display:none}
 /* for */
 .flist{display:flex;flex-direction:column;gap:4px}
 .frow{display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:14px;border:0;background:transparent;text-align:left;width:100%;transition:background .2s,transform .3s var(--bounce)}
@@ -518,7 +528,7 @@ html,body{height:100dvh;background:var(--ink)}
 <div class="phone" id="phone">
 <section class="scr" data-s="home" hidden>
   <div class="sbody pad">
-    <div class="topbar"><span class="av avsm" style="--c:#C9A8FF">A</span><div class="chiprow"><button class="pill on" type="button">All</button><button class="pill" type="button" data-fx="nav">Music</button><button class="pill" type="button" data-fx="nav">Podcasts</button><button class="pill" type="button" data-go="for">Mixtapes</button></div></div>
+    <div class="topbar"><span class="av avsm" style="--c:#C9A8FF">A</span><div class="chiprow"><button class="pill on" type="button">All</button><button class="pill" type="button" data-fx="nav">Music</button><button class="pill" type="button" data-fx="nav">Podcasts</button><button class="pill" type="button" data-go="for">Mixtapes</button></div><button class="inbox" type="button" data-go="open" aria-label="Open the mixtape you got"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3.5a8.5 8.5 0 016.5 3"/></svg><i class="badge">1</i></button><span class="inbox-tip" id="inboxTip">You got a mixtape! Tap to open</span></div>
     <article class="promo">
       <div><span class="tag">NEW</span><h2>Make a <em>mixtape</em></h2><p>Pick the songs, decorate the disc, record a hello. Then hand it to someone.</p><button class="btn go" data-go="for">Make a mixtape</button></div>
       <div class="minidisc" aria-hidden="true"></div>
@@ -1403,6 +1413,7 @@ function startFlow(){syncNames();const h=location.hash.slice(1);go(ORDER.include
 load();renderTools();render();
 startFlow();
 })();
+document.querySelector('.inbox').addEventListener('click',e=>e.currentTarget.classList.add('seen'));
 </script>
 
 </body></html>
