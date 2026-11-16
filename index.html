@@ -72,12 +72,20 @@ h1 em{font-family:var(--f-marker);font-style:normal;font-weight:400;color:var(--
 .left{display:flex;flex-direction:column;gap:24px}
 .tip{margin:0;font-size:14px;line-height:20px;color:var(--muted);text-align:center}
 .tip b{color:var(--text);font-weight:600}
+.mood{display:flex;flex-direction:column;gap:8px}
+.eyebrow{margin:0;font-size:12px;line-height:16px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.mood h2{margin:0;font-size:24px;line-height:32px;font-weight:800;letter-spacing:-.01em}
+.mood .lede{margin:0 0 8px}
+.moodimg{display:block;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 0 0 1px var(--surface-2)}
+.moodimg img{display:block;width:100%;height:auto;transition:transform .4s}
+.moodimg:active img{transform:scale(.98)}
+.mood .tip{text-align:left}
 .qr{display:none}
 footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--surface-2);font-size:12px;line-height:16px;color:var(--muted);display:flex;justify-content:space-between;gap:16px}
 
 /* big screens (projector / laptop): text left, disc + QR right */
 @media (min-width:960px){
-  .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;column-gap:64px;row-gap:24px;align-items:center;padding:48px}
+  .wrap{max-width:1080px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto auto;column-gap:64px;row-gap:24px;align-items:center;padding:48px}
   .kicker{grid-column:1/-1}
   .right{grid-row:2;grid-column:2;display:flex;flex-direction:column;align-items:center;gap:24px}
   .disc{width:360px}
@@ -89,6 +97,8 @@ footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--surface-2);fo
   .qr p{margin:0;font-size:14px;line-height:20px;color:var(--muted)}
   .qr p b{display:block;color:var(--text);font-size:16px;line-height:24px}
   .tip{text-align:left}
+  .mood{grid-column:1/-1;margin-top:48px}
+  .mood .lede{max-width:640px}
   footer{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){.disc{animation:none}}
@@ -136,6 +146,14 @@ footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--surface-2);fo
 
     <p class="tip">Best on your phone. On iPhone, tap <b>Share</b> then <b>Add to Home Screen</b> to open it full screen.</p>
   </div>
+
+  <section class="mood">
+    <p class="eyebrow">Where it started</p>
+    <h2>The moodboard</h2>
+    <p class="lede">From my Project 2 direction, Pass the Aux. Hand-drawn CDs, scribbled labels and loud color only in the sharing moment grew into Burn It For Me.</p>
+    <a class="moodimg" href="img/moodboard.jpg" target="_blank" rel="noopener"><img src="img/moodboard-960.jpg" srcset="img/moodboard-960.jpg 960w, img/moodboard.jpg 1752w" sizes="(min-width:960px) 984px, 100vw" width="1752" height="912" loading="lazy" alt="Pass the Aux moodboard: hand-drawn mix CDs, green light waves, yellow and green dots, Figtree type samples and Spotify icons on black"></a>
+    <p class="tip">Tap the image to see it full size.</p>
+  </section>
 
   <footer><span>Alice Zhen</span><span>SCAD UXDG 315, Fall 2026</span></footer>
 </main>
