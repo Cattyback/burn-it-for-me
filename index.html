@@ -799,7 +799,8 @@ const CLASS={to:'UXDG 315',title:'a mixtape for UXDG 315',finish:'airbrush',voic
     {kind:'sticker',key:'heart',x:58,y:73,rot:-8,sc:.45},
     {kind:'text',text:'thank you!',font:'hand',color:'#FFDF40',x:36,y:81,rot:-10,sc:.85},
     {kind:'text',text:'fall 2026',font:'hand',color:'#ffffff',x:50,y:66,rot:4,sc:.5}]};
-let giftMode='class';
+let giftMode='class',SHARED=null,shareURL='';
+const GIFT=()=>giftMode==='class'?CLASS:giftMode==='shared'?SHARED:window.__flow;
 const PLAYLISTS={
   mine:[{n:'Liked Songs',c:'#8E5BFF',c2:'#ffffff',ids:['s1','s6','s16','s17','s18','s12']},{n:'Y2K Forever',c:'#19C3C6',c2:'#FF3FA4',ids:['s2','s4','s5','s8']}],
   friends:[{n:"Road Trip '04",by:'Mia',c:'#FF6BB5',c2:'#5AB8FF',ids:['s7','s10','s11','s3','s9']},{n:'Garage Rock 1986',by:'Dad',c:'#FFDF40',c2:'#121212',ids:['s13','s14','s15']}]
@@ -1174,7 +1175,7 @@ function discClone(noInk){
   const n=++cloneN;
   c.querySelectorAll('[id]').forEach(el=>{const o=el.id,nu=o+'-c'+n;el.id=nu;c.querySelectorAll(`[href="#${o}"]`).forEach(h=>h.setAttribute('href','#'+nu))});
   const cans=c.querySelectorAll('canvas');
-  if(cans[0]){if(cv.width&&!noInk){const im=document.createElement('img');im.className='inkimg';im.alt='';im.src=cv.toDataURL();cans[0].replaceWith(im)}else cans[0].remove()}
+  if(cans[0]){if(typeof noInk==='string'){const im=document.createElement('img');im.className='inkimg';im.alt='';im.src=noInk;cans[0].replaceWith(im)}else if(cv.width&&!noInk){const im=document.createElement('img');im.className='inkimg';im.alt='';im.src=cv.toDataURL();cans[0].replaceWith(im)}else cans[0].remove()}
   if(cans[1])cans[1].remove();
   const h=c.querySelector('.hint');if(h)h.remove();
   selected=keep;render();
@@ -1196,9 +1197,9 @@ function go(name){
     if(on){const b=sc.querySelector('.sbody');if(b&&prev)b.scrollTop=0}});
   ENTER[name]&&ENTER[name]();
   renderFlowNav();
-  if(location.hash.slice(1)!==name){try{location.hash=name}catch(e){}}
+  if(location.hash.slice(1)!==name&&!(name==='open'&&giftMode==='shared'&&location.hash.startsWith('#m='))){try{location.hash=name}catch(e){}}
 }
-window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur&&ORDER.includes(h))go(h)});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h.startsWith('m=')){openShared(h.slice(2));return}if(h&&h!==cur&&ORDER.includes(h))go(h)});
 function renderFlowNav(){
   const b=n=>`<li><button type="button" data-go="${n}"${n===cur?' aria-current="step"':''}>${LABEL[n]}</button></li>`;
 
@@ -1316,7 +1317,25 @@ function startBurn(){
 }
 
 /* ---------- 6 · sent ---------- */
+/* ---------- personal share link: the whole mixtape travels inside the URL ---------- */
+const b64u=bytes=>{let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const unb64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const s=atob(t),b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b};
+const shrinkImg=(src,size,type,q)=>new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=size;const k=Math.min(im.width,im.height);
+  c.getContext('2d').drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,size,size);res(c.toDataURL(type,q))};im.onerror=()=>res(null);im.src=src});
+async function buildShare(){
+  const items=[];for(const it of state.items){const o={...it};delete o.id;if(o.kind==='photo'&&o.src&&o.src.startsWith('data:')){o.src=await shrinkImg(o.src,160,'image/jpeg',.6);if(!o.src){delete o.src;o.preset='polaroid'}}items.push(o)}
+  let ink=null;if(state.inked&&cv.width){const c=document.createElement('canvas');c.width=c.height=260;c.getContext('2d').drawImage(cv,0,0,260,260);ink=c.toDataURL('image/webp',.7)}
+  const d={to:friend().n,title:flow.title,finish:state.finish,items,ink,voice:flow.voice,wave:sample(flow.wave,40).map(Math.round),text:flow.text,A:flow.A,B:flow.B};
+  let bytes=new TextEncoder().encode(JSON.stringify(d)),tag='j';
+  if(window.CompressionStream){try{const st=new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer());tag='z'}catch(e){}}
+  return location.origin+location.pathname+'#m='+tag+b64u(bytes);
+}
+async function readShare(h){const tag=h[0];let bytes=unb64u(h.slice(1));
+  if(tag==='z'){const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(st).arrayBuffer())}
+  const d=JSON.parse(new TextDecoder().decode(bytes));d.A=(d.A||[]).filter(id=>SONG[id]);d.B=(d.B||[]).filter(id=>SONG[id]);d.wave=d.wave||[];d.voice=+d.voice||0;d.text=d.text||'';return d}
+function openShared(h){readShare(h).then(d=>{SHARED=d;giftMode='shared';cur=null;go('open')}).catch(()=>{toast("That mixtape link didn't come through");go('home')})}
 function renderSent(){
+  shareURL='';buildShare().then(u=>shareURL=u).catch(()=>{});
   syncNames();const f=friend(),later=flow.when==='later';
   const c=$('#sentCase');c.innerHTML='';c.appendChild(discClone());c.style.animation='none';void c.offsetWidth;c.style.animation='';
   $('#sentH').textContent=later?`Wrapped for ${f.n}!`:`Sent to ${f.n}!`;
@@ -1340,14 +1359,14 @@ function renderNotify(){
 /* ---------- 8 · unwrap ---------- */
 let opened=false,kept=false;
 const pl={q:[],i:0,t:0,on:false,raf:null,last:0};
-function classDisc(){const s=state,sel=selected;state={finish:CLASS.finish,inked:false,items:CLASS.items.map(x=>({...x,id:uid++}))};selected=null;
-  const c=discClone(true);state=s;selected=sel;render();return c}
+function giftDisc(G){const s=state,sel=selected;state={finish:G.finish||'silver',inked:false,items:(G.items||[]).map(x=>({...x,id:uid++}))};selected=null;
+  const c=discClone(G.ink||true);state=s;selected=sel;render();return c}
 function renderOpen(){
-  syncNames();opened=false;const cls=giftMode==='class';
-  $('#openTtl').textContent=`From ${SENDER}`;$('#forLbl').textContent=`for ${cls?CLASS.to:friend().n} ♥`;
-  $('[data-s=open] [data-title]').textContent=cls?CLASS.title:flow.title;
+  syncNames();opened=false;const own=giftMode==='flow',G=GIFT();
+  $('#openTtl').textContent=`From ${SENDER}`;$('#forLbl').textContent=`for ${own?friend().n:G.to} ♥`;
+  $('[data-s=open] [data-title]').textContent=G.title;
   const g=$('#gift');g.classList.remove('open');g.setAttribute('aria-label','Open the case');
-  const gd=$('#giftDisc');gd.innerHTML='';gd.appendChild(cls?classDisc():discClone());
+  const gd=$('#giftDisc');gd.innerHTML='';gd.appendChild(own?discClone():giftDisc(G));
   $('#tapHint').hidden=false;$('#reveal').hidden=true;$('#reveal').innerHTML='';$('#mini').hidden=true;$('#openBody').style.paddingBottom='';
 }
 /* confetti, curly streamers and surprise stickers burst out of the case */
@@ -1381,13 +1400,13 @@ function openGift(){
   const host=$('[data-s=open]'),gift=$('#gift');setTimeout(()=>{if(cur==='open')burst(host,gift,true)},280);setTimeout(()=>{if(cur==='open')burst(host,gift,false)},900);
   setTimeout(()=>{if(cur!=='open')return;const r=$('#reveal');r.innerHTML=revealHTML();r.hidden=false;r.scrollIntoView({behavior:'smooth',block:'start'})},1500);
 }
-function revealHTML(){const flow=giftMode==='class'?CLASS:window.__flow;
+function revealHTML(){const flow=GIFT();
   const voice=flow.voice?`<div class="vplay"><button type="button" class="pbtn" data-fx="playq" data-v="0" aria-label="Play voice note">${I.playf}</button><span class="vt"><b>Track 0 · From ${SENDER}</b>${barsHTML(sample(flow.wave,30).map(h=>Math.max(4,h*.45)),'tiny')}</span><span class="tm">${fmt(flow.voice)}</span></div>`:'';
   const note=flow.text.trim()?`<p class="notecard">${esc(flow.text.trim())}<span class="sig">${SENDER}</span></p>`:'';
   const side=x=>flow[x].length?`<p class="lh">Side ${x}</p><ol>${flow[x].map(id=>`<li>${esc(SONG[id].t)} <small>${esc(SONG[id].a)}</small></li>`).join('')}</ol>`:'';
   return voice+note+`<div class="liner big">${side('A')}${side('B')}</div><div class="actions"><button type="button" class="btn go" data-fx="playq" data-v="0">${I.playf}Play mixtape</button><button type="button" class="btn soft" data-fx="keep" aria-pressed="${kept}">${kept?I.check+'On your shelf':'Keep on shelf'}</button></div><button type="button" class="btn soft home-btn" data-go="home">${I.home}Back to Home</button>`;
 }
-function queue(){const flow=giftMode==='class'?CLASS:window.__flow;const q=[];if(flow.voice)q.push({t:`Track 0 · From ${SENDER}`,a:'Voice note',d:flow.voice});[...flow.A,...flow.B].forEach(id=>q.push(SONG[id]));return q}
+function queue(){const flow=GIFT();const q=[];if(flow.voice)q.push({t:`Track 0 · From ${SENDER}`,a:'Voice note',d:flow.voice});[...flow.A,...flow.B].forEach(id=>q.push(SONG[id]));return q}
 function playQ(i){pl.q=queue();if(!pl.q.length)return;pl.i=i;pl.t=0;pl.on=true;$('#mini').hidden=false;$('#openBody').style.paddingBottom='86px';drawMini();pl.last=performance.now();cancelAnimationFrame(pl.raf);pl.raf=requestAnimationFrame(tickP)}
 function tickP(now){if(!pl.on)return;pl.t+=(now-pl.last)/1000;pl.last=now;
   if(pl.t>=pl.q[pl.i].d){if(pl.i<pl.q.length-1){pl.i++;pl.t=0;drawMini()}else{pl.on=false;pl.t=pl.q[pl.i].d;drawMini();return}}
@@ -1403,7 +1422,7 @@ function stopAll(){
   if(!sheet.hidden)closeSheet();
 }
 document.addEventListener('click',e=>{
-  const g=e.target.closest('[data-go]');if(g){e.preventDefault();go(g.dataset.go);return}
+  const g=e.target.closest('[data-go]');if(g){e.preventDefault();if(g.classList.contains('inbox'))giftMode='class';go(g.dataset.go);return}
   const b=e.target.closest('[data-fx]');if(!b)return;const v=b.dataset.v;
   switch(b.dataset.fx){
     case 'nav':toast('Coming soon');break;
@@ -1421,8 +1440,8 @@ document.addEventListener('click',e=>{
     case 'story':openStory();break;
     case 'storyx':$('#story').hidden=true;break;
     case 'storypost':$('#story').hidden=true;toast('Shared to your story');break;
-    case 'copy':{const u=location.origin+location.pathname+'#open';try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied');break}
-    case 'more':{const u=location.origin+location.pathname+'#open';if(navigator.share){navigator.share({title:flow.title,text:'I burned you a mixtape',url:u}).catch(()=>{})}else{try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied')}break}
+    case 'copy':{const done=u=>{try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied')};shareURL?done(shareURL):buildShare().then(u=>{shareURL=u;done(u)});break}
+    case 'more':{const u=shareURL||location.origin+location.pathname;if(navigator.share){navigator.share({title:flow.title,text:'I burned you a mixtape',url:u}).catch(()=>{})}else{try{navigator.clipboard.writeText(u)}catch(e){}toast('Link copied')}break}
     case 'gift':openGift();break;
     case 'playq':playQ(+v||0);break;
     case 'pp':pl.on=!pl.on;if(pl.on){pl.last=performance.now();pl.raf=requestAnimationFrame(tickP)}else cancelAnimationFrame(pl.raf);drawMini();break;
@@ -1430,7 +1449,7 @@ document.addEventListener('click',e=>{
     case 'keep':kept=!kept;b.setAttribute('aria-pressed',kept);b.innerHTML=kept?I.check+'On your shelf':'Keep on shelf';toast(kept?'Added to your mixtape shelf':'Removed from your shelf');break;
   }
 });
-function startFlow(){syncNames();const h=location.hash.slice(1);go(ORDER.includes(h)?h:'home')}
+function startFlow(){syncNames();const h=location.hash.slice(1);if(h.startsWith('m=')){openShared(h.slice(2));return}if(h==='open')giftMode='class';go(ORDER.includes(h)?h:'home')}
 
 load();renderTools();render();
 startFlow();
