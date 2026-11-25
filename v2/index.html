@@ -689,6 +689,8 @@ html,body{height:100dvh;background:var(--ink)}
 .trow .rb svg{width:22px;height:22px}
 .trow .rb.ok{color:var(--green)}
 .trow .rb[data-full]{opacity:.35}
+.trow.other .sm b{color:#b3b3b3}
+.sidetag{border:0;background:#3e3e3e;color:#fff;font-size:12px;font-weight:700;height:28px;padding:0 12px;border-radius:14px;flex:none;white-space:nowrap}
 .addrow .addtile{width:44px;height:44px;border-radius:3px;background:#282828;display:grid;place-items:center;flex:none;color:var(--muted)}
 .addrow .addtile svg{width:24px;height:24px}
 .addrow .sm b{font-size:16px}
@@ -1608,7 +1610,7 @@ function songRow_old(id){
 }
 function renderSongList(){
   let h='';
-  if(flow.src==='search'){const q=flow.q.trim().toLowerCase();const ids=SONGS.filter(x=>!q||(x.t+' '+x.a).toLowerCase().includes(q)).map(x=>x.id);
+  if(flow.src==='search'){const q=flow.q.trim().toLowerCase(),sd=flow.side,od=sd==='A'?'B':'A',rk=id=>flow[sd].includes(id)?0:flow[od].includes(id)?2:1;const ids=SONGS.filter(x=>!q||(x.t+' '+x.a).toLowerCase().includes(q)).map(x=>x.id);const key=sd+'|'+q;if(window.__addKey!==key){window.__addKey=key;window.__addOrder=SONGS.map(x=>x.id).sort((p,q2)=>rk(p)-rk(q2))}ids.sort((p,q2)=>window.__addOrder.indexOf(p)-window.__addOrder.indexOf(q2));
     h=ids.length?ids.map(songRow).join(''):`<p class="sub">No songs match “${esc(flow.q)}”.</p>`}
   else if(flow.src==='spotify')h=spotifyPane();
   else h=PLAYLISTS[flow.src].map(pl=>`<div class="plh"><i class="cov" style="--c:${pl.c};--c2:${pl.c2}"></i><span><b>${esc(pl.n)}</b><small>${pl.by?`<span class="from">${esc(pl.by)}'s playlist</span>`:'Your playlist'} · ${pl.ids.length} songs</small></span></div>`+pl.ids.map(songRow).join('')).join('');
@@ -1999,10 +2001,18 @@ function addName(){const inp=$('#nameIn'),n=inp.value.trim();if(!n){inp.focus();
 
 /* ---------- 2 · songs ---------- */
 const MOODS=['Upbeat','Pop','Hip Hop','Throwback','Chill','Love','Latin'];let mood=null,menuId=null;
-function trow(id,kind){const x=SONG[id],inA=flow.A.includes(id),inB=flow.B.includes(id),on=inA||inB,fits=sideSecs(flow.side)+x.d<=CAP;
+function trow(id,kind){const x=SONG[id],sd=flow.side,od=sd==='A'?'B':'A',here=flow[sd].includes(id),there=flow[od].includes(id),fits=sideSecs(sd)+x.d<=CAP;
   const meta=`${esc(x.a)} · ${fmt(x.d)}`;
   if(kind==='side')return `<div class="trow"><i class="cov" style="--c:${x.c};--c2:${x.c2}"></i><span class="sm"><b>${esc(x.t)}</b><small>${meta}</small></span><button type="button" class="rb" data-fx="songmenu" data-v="${id}" aria-label="Options for ${esc(x.t)}">${I.more}</button></div>`;
-  return `<div class="trow${on?' on':''}"><i class="cov" style="--c:${x.c};--c2:${x.c2}"></i><span class="sm"><b>${esc(x.t)}</b><small>${meta}${on?` · on Side ${inA?'A':'B'}`:''}</small></span><button type="button" class="rb${on?' ok':''}" data-fx="addsong" data-v="${id}" aria-pressed="${on}" aria-label="${on?'Remove':'Add'} ${esc(x.t)}"${!on&&!fits?' data-full="1"':''}>${on?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1ED760"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#000" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':I.plusc}</button></div>`}
+  const ck='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#1ED760"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#000" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  if(here)return `<div class="trow on"><i class="cov" style="--c:${x.c};--c2:${x.c2}"></i><span class="sm"><b>${esc(x.t)}</b><small>${meta}</small></span><button type="button" class="rb ok" data-fx="pick" data-v="${id}" aria-pressed="true" aria-label="Remove ${esc(x.t)} from Side ${sd}">${ck}</button></div>`;
+  if(there)return `<div class="trow other"><i class="cov" style="--c:${x.c};--c2:${x.c2}"></i><span class="sm"><b>${esc(x.t)}</b><small>${meta} · on Side ${od}</small></span><button type="button" class="sidetag" data-fx="pick" data-v="${id}" aria-label="Move ${esc(x.t)} to Side ${sd}">Move here</button></div>`;
+  return `<div class="trow"><i class="cov" style="--c:${x.c};--c2:${x.c2}"></i><span class="sm"><b>${esc(x.t)}</b><small>${meta}</small></span><button type="button" class="rb" data-fx="pick" data-v="${id}" aria-pressed="false" aria-label="Add ${esc(x.t)} to Side ${sd}"${!fits?' data-full="1"':''}>${I.plusc}</button></div>`}
+function pickSong(id){const sd=flow.side,od=sd==='A'?'B':'A',x=SONG[id];
+  if(flow[sd].includes(id)){flow[sd]=flow[sd].filter(v=>v!==id);toast(`Removed from Side ${sd}`)}
+  else{if(sideSecs(sd)+x.d>CAP){toast(`Side ${sd} is full. Try Side ${od}`);return}
+    const moved=flow[od].includes(id);flow[od]=flow[od].filter(v=>v!==id);flow[sd].push(id);toast(moved?`Moved to Side ${sd}`:`Added to Side ${sd}`)}
+  renderSongs()}
 function songRow(id){return trow(id,'add')}
 function renderSongs(){
   syncNames();const sd=flow.side;
@@ -2022,7 +2032,7 @@ function renderAdd(){const sd=flow.side;
   $('#addSides').innerHTML=['A','B'].map(x=>{const l=CAP-sideSecs(x);return `<button type="button" class="pill${x===sd?' on':''}" data-fx="side" data-v="${x}" aria-pressed="${x===sd}">Side ${x} · ${l<60?'full':fmt(l)+' left'}</button>`}).join('');
   $('#srcTabs').innerHTML=[['search','Suggested'],['mine','Your playlists'],['friends',"Friends' playlists"],['spotify',flow.sp?'From Spotify ✓':'From Spotify']].map(([k,n])=>`<button type="button" class="pill${k===flow.src?' on':''}" data-fx="src" data-v="${k}" aria-pressed="${k===flow.src}">${n}</button>`).join('');
   $('#sSearch').hidden=flow.src!=='search';renderSongList()}
-function openAdd(){$('#addSheet').hidden=$('#addScrim').hidden=false;renderAdd()}
+function openAdd(){window.__addKey=null;$('#addSheet').hidden=$('#addScrim').hidden=false;renderAdd()}
 function closeAdd(){$('#addSheet').hidden=$('#addScrim').hidden=true;renderSongs()}
 function openMenu(id){menuId=id;const x=SONG[id],sd=flow.A.includes(id)?'A':'B',o=sd==='A'?'B':'A';
   $('#songMenu').innerHTML=`<div class="grab"></div><div class="menuhead"><i class="cov" style="--c:${x.c};--c2:${x.c2};width:48px;height:48px;border-radius:3px"></i><span><b>${esc(x.t)}</b><small>${esc(x.a)} · Side ${sd}</small></span></div>
@@ -2142,6 +2152,7 @@ document.addEventListener('click',e=>{
     case 'songmenu':openMenu(v);break;
     case 'menuclose':closeMenu();break;
     case 'mvsong':{const f=flow.A.includes(v)?'A':'B',t=f==='A'?'B':'A';if(sideSecs(t)+SONG[v].d>CAP){closeMenu();toast(`Side ${t} is full`);break}flow[f]=flow[f].filter(x=>x!==v);flow[t].push(v);closeMenu();toast(`Moved to Side ${t}`);renderSongs();break}
+    case 'pick':pickSong(v);break;
     case 'rmsong2':for(const x of ['A','B'])flow[x]=flow[x].filter(y=>y!==v);closeMenu();toast('Removed from the mixtape');renderSongs();break;
     case 'sched':openSched();break;
     case 'schedx':closeSched();break;
