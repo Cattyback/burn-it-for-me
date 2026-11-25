@@ -823,6 +823,7 @@ html,body{height:100dvh;background:var(--ink)}
 .sent.v2 .sbody{align-items:stretch;justify-content:flex-start;text-align:left}
 .vcard.v2{align-items:stretch}
 .linkbtn{white-space:nowrap;min-width:max-content;flex:none;text-align:center}
+.sfoot.col .linkbtn{align-self:stretch;width:100%;min-width:0}
 .story.v2 .btn.wide{width:100%}
 .opnote{text-align:left}
 .sent-head{height:530px}
@@ -871,7 +872,7 @@ html,body{height:100dvh;background:var(--ink)}
 <section class="scr howto" data-s="howto" hidden>
   <div class="sbody">
     <div class="ht-head"><span class="wbgwrap" id="htBg"></span><span class="ht-case" id="htCase"></span>
-      <button type="button" class="iconbtn dark" data-go="home" aria-label="Close"><span data-ic="close"></span></button><span class="readpill">1 MIN READ</span></div>
+      <button type="button" class="iconbtn dark" data-go="home" aria-label="Close"><span data-ic="close"></span></button></div>
     <ol class="ht-steps pad">
       <li style="--c:#1ED760"><b>Who it's for</b><span>Pick one friend and an occasion. The occasion sets what the disc looks like.</span></li>
       <li style="--c:#FFDF40"><b>Pick the songs</b><span>Fill Side A and Side B, about 20 minutes each, like a real tape.</span></li>
@@ -1973,8 +1974,8 @@ function renderHowto(){const f=friend(),bg=$('#htBg');if(!bg.innerHTML)bg.innerH
   const c=$('#htCase');c.innerHTML='';
   c.appendChild(jcase(mkDisc('holo'),'burn it for me',`<span class="lidw" style="left:13%;top:7%;font:800 4.5cqw var(--f-ui);background:#1ED760;color:#121212;padding:1cqw 2.2cqw;border-radius:1cqw;letter-spacing:.05em">HOW IT WORKS</span>
    <span class="lidw" style="right:7%;top:6%;font-size:8cqw">for ${esc(f.n)} <span style="color:#FF3FA4">♥</span></span>
-   <span class="lidw" style="left:0;right:0;text-align:center;top:52%;font:400 10cqw var(--f-marker);text-shadow:0 0 6px rgba(255,255,255,.8)">Burn a mixtape</span>
-   <span class="lidw" style="left:0;right:0;text-align:center;top:66%;font-size:11.5cqw;color:#FF3FA4">in 5 steps</span>`));
+   <span class="lidw" style="left:0;right:0;text-align:center;top:24%;font:400 10cqw var(--f-marker);text-shadow:0 0 6px rgba(255,255,255,.8)">Burn a mixtape</span>
+   <span class="lidw" style="left:0;right:0;text-align:center;top:64%;font-size:11.5cqw;color:#FF3FA4">in 5 steps</span>`));
 }
 
 /* ---------- 1 · who it's for ---------- */
