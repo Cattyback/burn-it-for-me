@@ -1985,7 +1985,7 @@ function renderFor(){
   let list=FRIENDS.filter(f=>!q||f.n.toLowerCase().includes(q));
   if(!q&&!showAll){const top=list.slice(0,3);if(!top.find(f=>f.id===flow.fid)){const s=list.find(f=>f.id===flow.fid);if(s)top[2]=s}list=top}
   $('#seeAll').textContent=showAll?'Show less':`See all ${Math.max(12,FRIENDS.length)}`;
-  $('#flist').innerHTML=list.length?list.map(f=>`<button type="button" class="frow" data-fx="friend" data-v="${f.id}" aria-pressed="${f.id===flow.fid}"><span class="av" style="--c:${f.c}">${esc(f.n[0])}</span><span><span class="nm">${esc(f.n)}</span><small>${esc(f.s)}</small></span><span class="ck">${f.id===flow.fid?I.check:''}</span></button>`).join('')
+  $('#flist').innerHTML=list.length?list.map(f=>`<button type="button" class="frow" data-fx="friend" data-v="${f.id}" aria-pressed="${f.id===flow.fid}"><span class="av" style="--c:${f.c}">${esc(f.n[0])}</span><span class="nm">${esc(f.n)}</span><span class="ck">${f.id===flow.fid?I.check:''}</span></button>`).join('')
     :`<p class="sub">No friends match “${esc(q)}”. Type their name below instead.</p>`;
   const occ=$('#occ');occ.innerHTML='';
   OCC.forEach(o=>{const b=document.createElement('button');b.type='button';b.className='occ';b.dataset.fx='occ';b.dataset.v=o;b.setAttribute('aria-pressed',o===flow.occ);
