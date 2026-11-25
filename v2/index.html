@@ -553,8 +553,8 @@ html,body{height:100dvh;background:var(--ink)}
 /* ================= v2 · Figma port ================= */
 .btn.go{transform:none;box-shadow:none}
 .btn.white{background:#fff;color:#000}
-.textbtn{border:0;background:none;color:var(--muted);font-weight:700;font-size:15px;padding:10px;align-self:center}
-.textbtn.green{color:var(--green)}
+.linkbtn{border:0;background:none;color:var(--muted);font-weight:700;font-size:15px;padding:10px;align-self:center}
+.linkbtn.green{color:var(--green)}
 .ghosticon{background:transparent!important}
 .iconbtn.dark{background:rgba(18,18,18,.72)}
 .label{margin:0}
@@ -705,7 +705,7 @@ html,body{height:100dvh;background:var(--ink)}
 .bsheet .grab{width:36px;height:4px;border-radius:2px;background:#5e5e5e;align-self:center;flex:none}
 .bsh-h{display:flex;align-items:center;justify-content:space-between}
 .bsh-h b{font-size:17px}
-.bsh-h .textbtn{padding:6px 0}
+.bsh-h .linkbtn{padding:6px 0}
 .bsheet .search{background:#3e3e3e}
 .bsheet .pill{background:#3e3e3e}.bsheet .pill.on{background:var(--green)}
 .bsh-body{flex:1;min-height:0;overflow-y:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none}
@@ -822,7 +822,7 @@ html,body{height:100dvh;background:var(--ink)}
 .shitem small .nd{width:8px;height:8px;border-radius:50%;background:var(--green)}
 .sent.v2 .sbody{align-items:stretch;justify-content:flex-start;text-align:left}
 .vcard.v2{align-items:stretch}
-.textbtn{white-space:nowrap}
+.linkbtn{white-space:nowrap;min-width:max-content;flex:none;text-align:center}
 .story.v2 .btn.wide{width:100%}
 .opnote{text-align:left}
 .sent-head{height:530px}
@@ -880,7 +880,7 @@ html,body{height:100dvh;background:var(--ink)}
       <li style="--c:#C9A8FF"><b>Burn &amp; send</b><span>Send it now or schedule it. It lands on their mixtape shelf.</span></li>
     </ol>
   </div>
-  <footer class="sfoot pad col"><button class="btn go" data-go="for">Start my mixtape</button><button type="button" class="textbtn" data-go="home">Maybe later</button></footer>
+  <footer class="sfoot pad col"><button class="btn go" data-go="for">Start my mixtape</button><button type="button" class="linkbtn" data-go="home">Maybe later</button></footer>
 </section>
 
 <section class="scr" data-s="for" hidden>
@@ -916,7 +916,7 @@ html,body{height:100dvh;background:var(--ink)}
   <div class="scrim2" id="addScrim" hidden data-fx="addclose"></div>
   <div class="bsheet tall" id="addSheet" hidden role="dialog" aria-label="Add songs">
     <div class="grab"></div>
-    <div class="bsh-h"><button type="button" class="textbtn" data-fx="addclose">Cancel</button><b>Add songs</b><button type="button" class="textbtn green" data-fx="addclose">Done</button></div>
+    <div class="bsh-h"><button type="button" class="linkbtn" data-fx="addclose">Cancel</button><b>Add songs</b><button type="button" class="linkbtn green" data-fx="addclose">Done</button></div>
     <div class="chiprow" id="addSides"></div>
     <label class="search" id="sSearch"><span data-ic="search"></span><input id="sq" type="search" placeholder="Search songs" autocomplete="off" aria-label="Search songs"></label>
     <div class="chiprow" id="srcTabs"></div>
@@ -2025,7 +2025,7 @@ function openAdd(){$('#addSheet').hidden=$('#addScrim').hidden=false;renderAdd()
 function closeAdd(){$('#addSheet').hidden=$('#addScrim').hidden=true;renderSongs()}
 function openMenu(id){menuId=id;const x=SONG[id],sd=flow.A.includes(id)?'A':'B',o=sd==='A'?'B':'A';
   $('#songMenu').innerHTML=`<div class="grab"></div><div class="menuhead"><i class="cov" style="--c:${x.c};--c2:${x.c2};width:48px;height:48px;border-radius:3px"></i><span><b>${esc(x.t)}</b><small>${esc(x.a)} · Side ${sd}</small></span></div>
-   <button type="button" class="mitem" data-fx="mvsong" data-v="${id}">${I.swap}Move to Side ${o}</button><button type="button" class="mitem" data-fx="rmsong2" data-v="${id}">${I.rmc}Remove from mixtape</button><button type="button" class="textbtn" data-fx="menuclose">Cancel</button>`;
+   <button type="button" class="mitem" data-fx="mvsong" data-v="${id}">${I.swap}Move to Side ${o}</button><button type="button" class="mitem" data-fx="rmsong2" data-v="${id}">${I.rmc}Remove from mixtape</button><button type="button" class="linkbtn" data-fx="menuclose">Cancel</button>`;
   $('#songMenu').hidden=$('#menuScrim').hidden=false}
 function closeMenu(){$('#songMenu').hidden=$('#menuScrim').hidden=true}
 
