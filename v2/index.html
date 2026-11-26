@@ -1,4 +1,4 @@
-<!doctype html><html data-build="2026-11-25 22:55"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#121212"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mixtape"><style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#121212;color:#f7f7f5;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html data-build="2026-11-25 23:00"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#121212"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mixtape"><style>:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#121212;color:#f7f7f5;overscroll-behavior:none;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Burn It For Me</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -745,6 +745,8 @@ html,body{height:100dvh;background:var(--ink)}
 .vctl2 .sb.done{width:44px;height:44px;border-radius:50%;background:var(--green);color:#000}
 .vctl2 .sb.done svg{width:22px;height:22px}
 .vctl2{align-items:flex-start}
+.vstate.pz{color:var(--yellow);font-weight:800}
+.vctl2 .sb.done:disabled{background:#3e3e3e;color:#777}
 .vstate.ok{color:var(--green);font-weight:800}
 .vcap2{margin:0;text-align:center;color:var(--muted);font-size:13px}
 .linerfield{width:100%;box-sizing:border-box;border:0;border-radius:12px;background:#1b1b1b;color:#fff;font:15px/22px var(--f-ui);padding:16px 16px 34px;resize:none;outline:none;min-height:168px}
@@ -1679,7 +1681,7 @@ function toggleRec_old(){
       const tm=$('#vcard .timer');if(tm)tm.textContent=fmt(rec.t);if(rec.t>=30)stopRec()},100)}
   else if(rec.st==='rec')stopRec();
 }
-function stopRec(){clearInterval(rec.iv);rec.iv=null;if(rec.st!=='rec')return;flow.voice=Math.max(2,Math.round(rec.t));rec.st='review';rec.pos=0;if(cur==='note')drawV()}
+function stopRec(){clearInterval(rec.iv);rec.iv=null;if(rec.st!=='rec'&&rec.st!=='paused')return;flow.voice=Math.max(2,Math.round(rec.t));rec.st='review';rec.pos=0;if(cur==='note')drawV()}
 function playVoice_old(){
   const btn=$('#vcard .pbtn');if(!btn)return;
   if(rec.playing){rec.playing=false;cancelAnimationFrame(rec.raf);btn.innerHTML=I.playf;btn.setAttribute('aria-label','Play voice note');return}
@@ -1819,7 +1821,7 @@ function drawMini0(){const tr=pl.q[pl.i],m=$('#mini');m.classList.toggle('on',pl
 
 /* ---------- shared ---------- */
 function stopAll(){
-  if(rec.st==='rec')stopRec();clearInterval(rec.iv);rec.playing=false;cancelAnimationFrame(rec.raf);
+  if(rec.st==='rec'||rec.st==='paused')stopRec();clearInterval(rec.iv);rec.playing=false;cancelAnimationFrame(rec.raf);
   cancelAnimationFrame(burnRaf);clearTimeout(burnT);$('#burn').hidden=true;
   pl.on=false;cancelAnimationFrame(pl.raf);$('#story').hidden=true;
   if(!sheet.hidden)closeSheet();
@@ -1840,8 +1842,9 @@ document.addEventListener('click',e=>{
     case 'rmsong':flow[flow.side]=flow[flow.side].filter(x=>x!==v);renderSongs();break;
     case 'rec':toggleRec();break;
     case 'vplay':playVoice();break;
+    case 'recdone':stopRec();break;
     case 'vdone':rec.playing=false;cancelAnimationFrame(rec.raf);rec.pos=0;rec.st='done';drawV();toast('Saved as Track 0');break;
-    case 'redo':rec.pos=0;rec.playing=false;cancelAnimationFrame(rec.raf);flow.voice=0;flow.wave=[];rec.st='idle';drawV();break;
+    case 'redo':clearInterval(rec.iv);rec.iv=null;rec.pos=0;rec.playing=false;cancelAnimationFrame(rec.raf);flow.voice=0;flow.wave=[];rec.st='idle';drawV();break;
     case 'when':flow.when=v;renderSend();break;
     case 'burn':startBurn();break;
     case 'story':openStory();break;
@@ -2053,7 +2056,12 @@ function drawV(){
   const head=(st)=>`<div class="vhead"><span class="vtile">${I.mic}</span><span class="sm"><b>Intro from ${SENDER}</b><small>Track 0 · plays before ${first?esc(first.t):'track 1'}</small></span>${st}</div>`;
   const prog=(p,l,r)=>`<div class="vprog"><i style="width:${(p*100).toFixed(1)}%"></i></div><div class="vtimes"><span class="vt1">${l}</span><span class="vt2">${r}</span></div>`;
   if(rec.st==='idle')v.innerHTML=head('<span class="vstate">30 sec max</span>')+prog(0,'0:00','0:30')+`<div class="vctl2"><button type="button" class="sb" disabled aria-label="Record again">${I.redoc}</button><button type="button" class="bb" data-fx="rec" aria-label="Start recording">${I.mic}</button><button type="button" class="sb" disabled aria-label="Play back">${I.playf}</button></div><p class="vcap2">Tap to record</p>`;
-  else if(rec.st==='rec')v.innerHTML=head('<span class="vstate r">Recording</span>')+prog(rec.t/30,fmt(rec.t),'-'+fmt(30-rec.t))+`<div class="vctl2"><button type="button" class="sb" disabled aria-label="Record again">${I.redoc}</button><button type="button" class="bb" data-fx="rec" aria-label="Stop recording"><span class="sq"></span></button><button type="button" class="sb" disabled aria-label="Play back">${I.playf}</button></div><p class="vcap2">Recording · tap to stop</p>`;
+  else if(rec.st==='rec'||rec.st==='paused'){const pz=rec.st==='paused';
+    v.innerHTML=head(pz?'<span class="vstate pz">Paused</span>':'<span class="vstate r">Recording</span>')+prog(rec.t/30,fmt(rec.t),'-'+fmt(30-rec.t))+
+    `<div class="vctl2"><span class="lb"><button type="button" class="sb" data-fx="redo" aria-label="Start over"${pz?'':' disabled'}>${I.redoc}</button><small>Redo</small></span>`+
+    `<span class="lb"><button type="button" class="bb${pz?'':' recing'}" data-fx="rec" aria-label="${pz?'Keep recording':'Pause recording'}">${pz?I.mic:I.pause}</button><small>${pz?'Resume':'Pause'}</small></span>`+
+    `<span class="lb"><button type="button" class="sb done" data-fx="recdone" aria-label="Finish recording"${rec.t<1?' disabled':''}>${I.check}</button><small>Done</small></span></div>`+
+    `<p class="vcap2">${pz?'Paused. Tap the mic to keep recording.':'Recording · tap to pause'}</p>`}
   else{const review=rec.st==='review',playing=!!rec.playing,p=(rec.pos||0)/Math.max(1,flow.voice);
     v.innerHTML=head(review?`<span class="vstate">${fmt(flow.voice)}</span>`:'<span class="vstate ok">Saved</span>')+prog(p,fmt(rec.pos||0),fmt(flow.voice))+
     `<div class="vctl2"><span class="lb"><button type="button" class="sb" data-fx="redo" aria-label="Record again">${I.redoc}</button><small>Redo</small></span>`+
@@ -2061,11 +2069,13 @@ function drawV(){
     (review?`<span class="lb"><button type="button" class="sb done" data-fx="vdone" aria-label="Done, use this recording">${I.check}</button><small>Done</small></span>`:`<span class="lb"><button type="button" class="sb" data-fx="redo" aria-label="Delete recording">${I.rmc}</button><small>Delete</small></span>`)+
     `</div><p class="vcap2">${review?'Listen back. Tap Done to keep it.':`Saved as Track 0. ${esc(friend().n)} hears this first.`}</p>`}
 }
+function recTick(){rec.iv=setInterval(()=>{rec.t=Math.min(30,rec.t+.1);flow.wave.push(8+Math.random()*44*(.35+.65*Math.abs(Math.sin(rec.t*2.3))));
+  const pi=$('#vcard .vprog i');if(pi)pi.style.width=(rec.t/30*100)+'%';const a=$('#vcard .vt1'),b=$('#vcard .vt2');if(a)a.textContent=fmt(rec.t);if(b)b.textContent='-'+fmt(30-rec.t);
+  const d=$('#vcard [data-fx=recdone]');if(d&&rec.t>=1)d.disabled=false;if(rec.t>=30){stopRec();toast('30 seconds is the max')}},100)}
 function toggleRec(){
-  if(rec.st==='idle'){rec.st='rec';rec.t=0;flow.wave=[];drawV();
-    rec.iv=setInterval(()=>{rec.t+=.1;flow.wave.push(8+Math.random()*44*(.35+.65*Math.abs(Math.sin(rec.t*2.3))));
-      const pi=$('#vcard .vprog i');if(pi)pi.style.width=(rec.t/30*100)+'%';const a=$('#vcard .vt1'),b=$('#vcard .vt2');if(a)a.textContent=fmt(rec.t);if(b)b.textContent='-'+fmt(30-rec.t);if(rec.t>=30)stopRec()},100)}
-  else if(rec.st==='rec')stopRec();
+  if(rec.st==='idle'){rec.st='rec';rec.t=0;flow.wave=[];drawV();recTick()}
+  else if(rec.st==='rec'){clearInterval(rec.iv);rec.iv=null;rec.st='paused';drawV()}
+  else if(rec.st==='paused'){rec.st='rec';drawV();recTick()}
 }
 function playVoice(){
   if(!$('#vcard .pbtn'))return;
